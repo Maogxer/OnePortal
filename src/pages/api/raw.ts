@@ -2,8 +2,8 @@ import { posix as pathPosix } from 'path-browserify'
 import axios from 'redaxios'
 
 import siteConfig from '../../../config/site.config'
-import { driveApi, cacheControlHeader } from '../../../config/api.config'
-import { encodePath, getAccessToken, checkAuthRoute } from '.'
+import { cacheControlHeader, driveApi } from '../../../config/api.config'
+import { checkAuthRoute, encodePath, getAccessToken } from '.'
 import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
@@ -20,16 +20,12 @@ export default async function handler(req: NextRequest): Promise<Response> {
   if (path === '[...path]') {
     return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
   }
-  // If the path is not a valid path, return 400
-  if (typeof path !== 'string') {
-    return new Response(JSON.stringify({ error: 'Path query invalid.' }), { status: 400 })
-  }
-  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path))
+
+  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path)).replace('.password', '')
 
   // Handle protected routes authentication
-  const odTokenHeader = (req.headers.get('od-protected-token') as string) ?? odpt
-
-  const { code, message } = await checkAuthRoute(cleanPath, accessToken, odTokenHeader)
+  const pass = (req.headers.get('opt-auth-pass') as string) ?? decodeURIComponent(odpt)
+  const { code, message } = await checkAuthRoute(cleanPath, accessToken, pass)
   // Status code other than 200 means user has not authenticated yet
   if (code !== 200) {
     return new Response(JSON.stringify({ error: message }), { status: code })

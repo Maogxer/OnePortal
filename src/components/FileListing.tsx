@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 import useLocalStorage from '../utils/useLocalStorage'
 import { getPreviewType, preview } from '../utils/getPreviewType'
 import { useProtectedSWRInfinite } from '../utils/fetchWithSWR'
-import { getExtension, getRawExtension, getFileIcon } from '../utils/getFileIcon'
+import { getExtension, getFileIcon, getRawExtension } from '../utils/getFileIcon'
 import { getStoredToken } from '../utils/protectedRouteHandler'
 import {
   DownloadingToast,
@@ -154,7 +154,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
   }>({})
 
   const router = useRouter()
-  const hashedToken = getStoredToken(router.asPath)
+  const token = getStoredToken(router.asPath)
   const [layout, _] = useLocalStorage('preferredLayout', layouts[0])
 
   const path = queryToPath(query)
@@ -162,7 +162,6 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
   const { data, error, size, setSize } = useProtectedSWRInfinite(path)
 
   if (error) {
-    // If error includes 403 which means the user has not completed initial setup, redirect to OAuth page
     if (error.status === 403) {
       router.push('/onedrive-oauth/step-1')
       return <div />
@@ -174,6 +173,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
       </PreviewContainer>
     )
   }
+
   if (!data) {
     return (
       <PreviewContainer>
@@ -193,7 +193,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
   if ('folder' in responses[0]) {
     // Expand list of API returns into flattened file data
     const folderChildren = ([].concat(...responses.map(r => r.folder.value)) as OdFolderObject['value']).filter(
-      item => item.name.toLowerCase() !== '.password' && item.name.toLowerCase() !== '.totp',
+      item => item.name.toLowerCase() !== '.password',
     )
 
     // Find README.md file to render
@@ -239,7 +239,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
         .filter(c => selected[c.id])
         .map(c => ({
           name: c.name,
-          url: `/api/raw?path=${path}/${encodeURIComponent(c.name)}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+          url: `/api/raw?path=${path}/${encodeURIComponent(c.name)}${token ? `&odpt=${encodeURIComponent(token)}` : ''}`,
         }))
 
       if (files.length == 1) {
@@ -273,7 +273,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
         .filter(c => selected[c.id])
         .map(
           c =>
-            `${baseUrl}/api/raw?path=${path}/${encodeURIComponent(c.name)}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+            `${baseUrl}/api/raw?path=${path}/${encodeURIComponent(c.name)}${token ? `&odpt=${encodeURIComponent(token)}` : ''}`,
         )
         .join('\n')
     }
@@ -286,10 +286,10 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
             toast.error(`Failed to download folder ${p}: ${error.status} ${error.message} Skipped it to continue.`)
             continue
           }
-          const hashedTokenForPath = getStoredToken(p)
+          const tokenForPath = getStoredToken(p)
           yield {
             name: c?.name,
-            url: `/api/raw?path=${p}${hashedTokenForPath ? `&odpt=${hashedTokenForPath}` : ''}`,
+            url: `/api/raw?path=${p}${tokenForPath ? `&odpt=${encodeURIComponent(tokenForPath)}` : ''}`,
             path: p,
             isFolder,
           }

@@ -24,8 +24,9 @@ Showcase, share, preview, and download files inside *your* OneDrive with OnePort
 ## What's different
 Compared with [onedrive-cf-index-ng](https://github.com/lyc8503/onedrive-cf-index-ng):
 - 🚀 Proxy downloading through Cloudflare network
+- 🔍 Improved file search with Microsoft Graph Search API
+  * The original version uses OneDrive Search API, which randomly misses files and is basically unusable.
 - 🔐 Improve security by:
-  - allowing to use TOTP instead of password
   - set custom AES secret key and client secret in environment variables
 - 😋 Better user interface
 - 🍪 Edge function caching for faster load times

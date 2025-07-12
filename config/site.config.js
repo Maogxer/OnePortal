@@ -7,7 +7,8 @@ module.exports = {
   // Make sure this is exactly the same as the email address you use to sign in to your Microsoft account.
   // You can also put this in your worker's environment variable if you worry about
   // your email being exposed in public.
-  userPrincipalName: process.env.USER_PRINCIPLE_NAME || 'i@example.com',
+  // Format: i@example.com
+  userPrincipalName: process.env.USER_PRINCIPLE_NAME || '',
 
   // [OPTIONAL] This is the website icon to the left of the title inside the navigation bar. It should be placed under the
   // /public directory of your GitHub project (not your OneDrive folder!), and referenced here by its relative path to /public.
@@ -29,7 +30,8 @@ module.exports = {
 
   // [OPTIONAL] If you have network problems when connecting github.io
   // you could replace it to somewhere proxies that.
-  PDFPreviewUrlPrefix: process.env.PDF_PREVIEW_URL_PREFIX || 'https://mozilla.github.io/pdf.js/web/viewer.html?file=',
+  // TODO: replace github.io with a better solution
+  PDFPreviewUrlPrefix: 'https://mozilla.github.io/pdf.js/web/viewer.html?file=',
 
   // [OPTIONAL] We use Google Fonts natively for font customisations.
   // You can check and generate the required links and names at https://fonts.google.com.
@@ -37,7 +39,7 @@ module.exports = {
   googleFontSans: 'Inter',
   // googleFontMono - the monospace font used in OnePortal.
   googleFontMono: 'Fira Mono',
-  // googleFontLinks -  an array of links for referencing the google font assets.
+  // googleFontLinks -  an array of links for referencing the Google font assets.
   googleFontLinks: ['https://fonts.googleapis.com/css2?family=Fira+Mono&family=Inter:wght@400;500;700&display=swap'],
 
   // [OPTIONAL] The footer component of your website. You can write HTML here, but you need to escape double
@@ -47,12 +49,14 @@ module.exports = {
 
   // [OPTIONAL] This is where you specify the folders that are password protected. It is an array of paths pointing to all
   // the directories in which you have .password set. Check the documentation for details.
-  protectedRoutes: process.env.NEXT_PUBLIC_ROUTES
+  protectedRoutes: process.env.NEXT_PUBLIC_PROTECTED_ROUTES ? process.env.NEXT_PUBLIC_PROTECTED_ROUTES.split('|') :
+    (process.env.NEXT_PUBLIC_ROUTES
     ? process.env.NEXT_PUBLIC_ROUTES.split(',')
-    : ['/Private/Personal', '/Demo/😎Another Private Folder Password 123'],
+    : []),
 
-  // [OPTIONAL] Use "" here if you want to remove this email address from the nav bar.
-  email: process.env.NEXT_PUBLIC_EMAIL || 'mailto:i@example.com',
+  // [OPTIONAL] Leave it empty if you want to remove this email address from the nav bar.
+  // Format: mailto:i@example.com
+  email: process.env.NEXT_PUBLIC_EMAIL || '',
   // [OPTIONAL] This is an array of names and links for setting your social information and links.
   // In the latest update, all brand icons inside font awesome is supported and the icon to render is based on the name
   // you provide. See the documentation for details.
